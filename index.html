@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>chatit</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/main.css">
+    </head>
+    <body>
+        <div class="jumbotron" style="padding:1em;">
+            <H1>chatit</H1>
+        </div>
+        <p class="text-muted">Hi, welcome to chatit </p>
+        <p class="text-muted">Quick Instructions: Your first msg should be /yourname (fill it please)</p>
+        <p class="text-muted">Happy Chatting</p>
+        <div class="col-lg-2" style="margin-top:20px;">
+            <div id="right">
+                <p>Online People:-</p>
+                <ul style="display:block;" id="online"></ul>
+            </div>
+        </div>
+        <div class="col-lg-8" style="margin-top:20px;">
+            <table id="messages"></table>
+        </div>
+
+        <div id="wrap">
+            <div class="navbar navbar-fixed-bottom" style="z-index:11000">
+                <div class="navbar-inner">
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="nav-collapse">
+                            <ul class="nav">
+                                <form action="">
+                                    <li> <input type="text" class="form-control" autocomplete="off" id="m" /> </li>
+                                    <li style="display:none;"> <button class="btn btn-primary btn-sm" type="submit">Send</button> </li>
+                                </form>
+                            </ul>        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+        <script>
+var socket = io();
+$('form').submit(function(){
+        console.log('please i am sending it leave me alone');
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+        return false;
+        });
+socket.on('chat message', function(msg){
+        $('#messages').append($('<tr>').text(msg[0]))
+        });
+socket.on('empty', function(){
+        console.log("emptiying");
+        document.getElementById('online').innerHTML="";
+        });
+socket.on('addonline',function(name){
+        console.log("adding"+name);
+        $("#online").append($('<li>').text(name));
+        });
+        </script>
+    </div>
+</div> 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="../../dist/js/bootstrap.min.js"></script>
+<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script> 
+    </body>
+</html>
