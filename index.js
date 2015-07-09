@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('./node_modules/socket.io')(http);
+var io = require('socket.io')(http);
 
 var nicks = new Array(1000);
 
@@ -79,17 +79,6 @@ io.on('connection', function(socket){
             }
         }
     });
-
-/*
-    socket.on('disconnect', function(){
-        for(var i=0;i<1000;i++){
-            if(nicks[i][0]==addr){
-                nicks[i][0]=0;
-            }
-        }
-        update();
-    }
-*/
 
 });
 
