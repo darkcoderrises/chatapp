@@ -11,8 +11,6 @@ for(var i=0;i<1000;i++){
     nicks[i][0]=0;
 }
 
-
-
 app.use(express.static(__dirname, '/css'));
 
 
