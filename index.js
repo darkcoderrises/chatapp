@@ -37,7 +37,7 @@ io.on('connection', function(socket){
     var name=-1,add=-1;
     update();
     for (var i=0;i<1000;i++)
-{
+    {
     if (nicks[i][0]==address){
         name=nicks[i][1];
         add=i;
@@ -51,12 +51,14 @@ if(name==-1)
             add=i;
             nicks[i][0]=0;
             nicks[i][1]=address;
-            name=nicks[i][1];  
+            name=nicks[i][0];  
             break;
         }
     }
 }
 
+if(name==-1)
+    socket.end();
 
 socket.on('chat message', function(msg){
     if (msg.charAt(0)=='/'){
@@ -72,7 +74,6 @@ socket.on('chat message', function(msg){
             var b = [name+":"+msg,a];
             console.log(b);
             io.emit('chat message',b);
-
         }
     }
 });
