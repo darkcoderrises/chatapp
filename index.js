@@ -9,7 +9,7 @@ function Person(name,addr)
     this.addr=addr;
 }
 
-var LIMIT=3;
+var LIMIT=1000;
 
 var nicks = new Array(LIMIT);
 
