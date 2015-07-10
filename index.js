@@ -31,52 +31,59 @@ function update(){
     }
 }
 
+
 io.on('connection', function(socket){
     var address=socket.handshake.address;
-    var name=-1;
+    var name=-1,add=-1;
     update();
     for (var i=0;i<1000;i++)
-    {
-        if (nicks[i][0]==address){
-            name=nicks[i][1]
+{
+    if (nicks[i][0]==address){
+        name=nicks[i][1];
+        add=i;
+    break;
+    }
+}
+if(name==-1)
+{
+    for (var i=0;i<1000;i++){   
+        if(nicks[i][0]==0){
+            add=i;
+            nicks[i][0]=0;
+            nicks[i][1]=address;
+            name=nicks[i][1];  
             break;
         }
     }
-    if(name==-1)
-    {
-        for (var i=0;i<1000;i++){   
-            if(nicks[i][0]==0){
-                nicks[i][0]=address;
-                nicks[i][1]=address;
-                name=nicks[i][1];  
-                break;
-            }
+}
+
+
+socket.on('chat message', function(msg){
+    if (msg.charAt(0)=='/'){
+        name = msg.substring(1,msg.length);
+        nicks[add][0]=nicks[add][1];
+        nicks[add][1]=name;
+        update();
+    }
+    else{
+        var currentdate=new Date();
+        var a = (currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds());
+        if(msg.length<1000 && name!=address){
+            var b = [name+":"+msg,a];
+            console.log(b);
+            io.emit('chat message',b);
+
         }
     }
+});
 
-
-    socket.on('chat message', function(msg){
-        if (msg.charAt(0)=='/'){
-            name = msg.substring(1,msg.length);
-            for (var i=0;i<1000;i++){
-                if(nicks[i][0]==address){
-                nicks[i][1]=name;
-                break;
-                }
-            }
-            update();
-        }
-        else{
-            var currentdate=new Date();
-            var a = (currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds());
-            if(msg.length<1000 && name!=address){
-                var b = [name+":"+msg,a];
-                console.log(b);
-                io.emit('chat message',b);
-
-            }
-        }
-    });
+socket.on('disconnect', function () {
+    var string = "user disconnected";
+    console.log(string);
+    nicks[add][0]=0;
+    nicks[add][1]=0;
+    update();
+});
 
 });
 

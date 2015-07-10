@@ -49,7 +49,6 @@
         <script>
 var socket = io();
 $('form').submit(function(){
-        console.log('please i am sending it leave me alone');
         socket.emit('chat message', $('#m').val());
         $('#m').val('');
         return false;
