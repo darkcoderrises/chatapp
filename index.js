@@ -3,21 +3,19 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-function Person(name,addr)
+var sendmsg = require("./js/sendmsg");
+
+function Person(name, addr,socket)
 {
-    this.name=name;
+    this.name=name.replace(/ /g,"");
     this.addr=addr;
+    this.sock=socket;
 }
 
-var LIMIT=1000;
-
-var nicks = new Array(LIMIT);
-
-for(var i=0;i<LIMIT;i++){
-    nicks[i]=new Person("",0);
-}
+var nicks = [];
 
 app.use(express.static(__dirname, '/css'));
+app.use(express.static(__dirname, '/js'));
 app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
@@ -26,64 +24,61 @@ app.get('/', function(req, res){
 
 function update(){
     io.emit('empty');
-    for(var i=0;i<LIMIT;i++)
+    for(var i=0;i<nicks.length;i++)
     {
-        if(nicks[i].addr!=0 & nicks[i].name!="")
-        {
-            io.emit('addonline',nicks[i].name);
-        }
+        io.emit('addonline',nicks[i].name);
     }
 }
 
-
+var clients = [];
 io.on('connection', function(socket){
+    clients.push(socket);
     var address=socket.handshake.address;
     var person=-1;
-    update();
-    for (var i=0;i<LIMIT;i++)
+    for (var i=0;i<nicks.length;i++)
     {
         if(nicks[i].addr==address)
         {
             person=i;
-        }
-        break;
-    }
-if(person==-1)
-{
-    for (var i=0;i<LIMIT;i++){   
-        if(nicks[i].addr==0){
-            person=i;
-            nicks[i]=new Person("",address);
             break;
         }
     }
-}
-if(person==-1)
-    socket.end();
 
-socket.on('chat message', function(msg){
-    console.log(msg);
-    if (msg.charAt(0)=='/'){
-        nicks[person].name = msg.substring(1,msg.length);
-        update();
+    if (person==-1)
+    {
+        nicks.push(new Person("",address,socket));
+        person=nicks.length-1;
     }
-    else{
-        var currentdate=new Date();
-        var a = (currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds());
-        if(msg.length<100 && person.name!=""){
-            var b = [nicks[person].name+":"+msg,a];
-            console.log(b);
-            io.emit('chat message',b);
+
+    socket.on('chat message', function(msg){
+        if (msg.charAt(0)=='/'){
+            nicks[person].name = msg.substring(1,msg.length);
+            update();
         }
-    }
-});
+        else{
+            var currentdate=new Date();
+            var a = (currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds());
+            if(msg.length<100 && nicks[person].name!="" && msg!=""){
+                var b = [nicks[person].name+":"+msg,a];
+                console.log(nicks[i].name,nicks[i].name!=" ");
+                console.log(b);
+                sendmsg.sendmsg(io,b);
+            }
+        }
+    });
 
-socket.on('disconnect', function () {
-    var string = "user disconnected";
-    console.log(string);
-    nicks[i]=new Person("",0);
-    update();
-});
+    socket.on('disconnect', function () {
+        var string = "user disconnected";
+        console.log(string);
+        var index = clients.indexOf(socket);
+        if (index != -1) {
+            clients.splice(index, 1);
+        }
+        if (person!=-1){
+            nicks.splice(person, 1);
+        }
+        update();
+    });
 
 });
 
