@@ -61,7 +61,7 @@ io.on('connection', function(socket){
         }
         else
         {
-            if(msg.length<100 && nick[person].name!="" && Math.abs(nick[person].time-curdate.getTime())>=1) 
+            if(msg.length<100 && nick[person].name!="" && Math.abs(nick[person].time-curdate.getTime())>=100) 
             {
                 var Msg = [nick[person].name+":"+msg,timesent];
                 console.log(Msg);
