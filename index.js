@@ -10,9 +10,10 @@ function Person(name, addr,socket)
     this.name=name.replace(/ /g,"");
     this.addr=addr;
     this.sock=socket;
+    this.time=new Date().getTime();
 }
 
-var nicks = [];
+var nick = [];
 
 app.use(express.static(__dirname, '/css'));
 app.use(express.static(__dirname, '/js'));
@@ -24,20 +25,18 @@ app.get('/', function(req, res){
 
 function update(){
     io.emit('empty');
-    for(var i=0;i<nicks.length;i++)
+    for(var i=0;i<nick.length;i++)
     {
-        io.emit('addonline',nicks[i].name);
+        io.emit('addonline',nick[i].name);
     }
 }
 
-var clients = [];
 io.on('connection', function(socket){
-    clients.push(socket);
     var address=socket.handshake.address;
     var person=-1;
-    for (var i=0;i<nicks.length;i++)
+    for (var i=0;i<nick.length;i++)
     {
-        if(nicks[i].addr==address)
+        if(nick[i].addr==address)
         {
             person=i;
             break;
@@ -46,36 +45,36 @@ io.on('connection', function(socket){
 
     if (person==-1)
     {
-        nicks.push(new Person("",address,socket));
-        person=nicks.length-1;
+        nick.push(new Person("",address,socket));
+        person=nick.length-1;
     }
 
+    nick[person].sock=socket;
+
     socket.on('chat message', function(msg){
+        var curdate=new Date();
+        var timesent = (curdate.getHours() + ":" + curdate.getMinutes() + ":" + curdate.getSeconds());
+        
         if (msg.charAt(0)=='/'){
-            nicks[person].name = msg.substring(1,msg.length);
+            nick[person].name = msg.substring(1,msg.length);
             update();
         }
-        else{
-            var currentdate=new Date();
-            var a = (currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds());
-            if(msg.length<100 && nicks[person].name!="" && msg!=""){
-                var b = [nicks[person].name+":"+msg,a];
-                console.log(nicks[i].name,nicks[i].name!=" ");
-                console.log(b);
-                sendmsg.sendmsg(io,b);
+        else
+        {
+            if(msg.length<100 && nick[person].name!="" && Math.abs(nick[person].time-curdate.getTime())>=1) 
+            {
+                var Msg = [nick[person].name+":"+msg,timesent];
+                console.log(Msg);
+                sendmsg.sendmsg(io,Msg);
             }
         }
+        
+        nick[person].time=curdate;
     });
 
     socket.on('disconnect', function () {
-        var string = "user disconnected";
-        console.log(string);
-        var index = clients.indexOf(socket);
-        if (index != -1) {
-            clients.splice(index, 1);
-        }
         if (person!=-1){
-            nicks.splice(person, 1);
+            nick.splice(person, 1);
         }
         update();
     });
