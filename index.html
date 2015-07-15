@@ -13,7 +13,7 @@
             <H1>chatApp</H1>
         </div>
         <p class="text-muted">Hi, welcome to chatApp </p>
-        <p class="text-muted">Quick Instructions: Your first msg should be /yourname (fill it please)</p>
+        <p class="text-muted">Quick Instructions: Your first msg should be /yourname and select room in the url by adding ?(room name) (fill it please)</p>
         <p class="text-muted">Happy Chatting</p>
         <div class="col-lg-2" style="margin-top:20px;">
             <div id="right">
@@ -47,28 +47,43 @@
         <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
         <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
         <script>
-var socket = io();
-$('form').submit(function(){
-        socket.emit('chat message', $('#m').val());
-        $('#m').val('');
-        return false;
-        });
-socket.on('chat message', function(msg){
-        $('#messages').append($('<tr>').text(msg[0]))
-        });
-socket.on('empty', function(){
-        console.log("emptiying");
-        document.getElementById('online').innerHTML="";
-        });
-socket.on('addonline',function(name){
-        console.log("adding"+name);
-        $("#online").append($('<li>').text(name));
-        });
+
+            var socket = io();
+            var room = window.location.href.split("?")[1];
+            if(room=="")
+                room="default"
+            
+            window.onload=function(){
+                socket.emit("subscribe",room);
+            }
+
+            $('form').submit(function(){
+                socket.emit('chat message', $('#m').val());
+                $('#m').val('');
+                return false;
+            });
+            
+            socket.on('chat message', function(msg){
+                $('#messages').append($('<tr>').text(msg[0]))
+            });
+            
+            socket.on('empty', function(){
+                console.log("emptiying");
+                document.getElementById('online').innerHTML="";
+            });
+            
+            socket.on('addonline',function(name,Room){
+                if(Room==room)
+                {
+                    console.log("adding"+name);
+                    $("#online").append($('<li>').text(name));
+                }
+            });
         </script>
-    </div>
-</div> 
+        </div>
+    </div> 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="../../dist/js/bootstrap.min.js"></script>
 <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script> 
-    </body>
+</body>
 </html>
