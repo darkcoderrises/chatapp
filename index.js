@@ -89,8 +89,8 @@ io.on('connection', function(socket){
     socket.on('disconnect', function () {
         if(person!=-1)
         {
-            nick.splice(person, 1);
             socket.leave(nick[person].room);
+            nick.splice(person, 1);
             update();
         }
     });
