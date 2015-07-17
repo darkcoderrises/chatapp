@@ -50,8 +50,8 @@
 
             var socket = io();
             var room = window.location.href.split("?")[1];
-            if(room=="")
-                room="default"
+            if(room==null)
+                room="default";
             
             window.onload=function(){
                 socket.emit("subscribe",room);

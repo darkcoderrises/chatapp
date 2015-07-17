@@ -37,26 +37,26 @@ function update(){
 io.on('connection', function(socket){
     var address=socket.handshake.address;
     var person=-1;
+    
+    for (var i=0;i<nick.length;i++)
+    {
+        if(nick[i].addr==address)
+        {
+            person=i;
+            break;
+        }
+    }
+
+    if (person==-1)
+    {
+        nick.push(new Person("",address,socket));
+        person=nick.length-1;
+    }
 
     socket.on('subscribe', function(room){
-        for (var i=0;i<nick.length;i++)
-        {
-            if(nick[i].addr==address)
-            {
-                person=i;
-                break;
-            }
-        }
-
-        if (person==-1)
-        {
-            nick.push(new Person("",address,socket));
-            person=nick.length-1;
-        }
 
         nick[person].sock=socket;
-
-        console.log(room)
+        console.log("room:",room)
         nick[person].sock.join(room);
         nick[person].room=room;
     });
@@ -65,11 +65,14 @@ io.on('connection', function(socket){
         if(person==-1)
             return;
 
+        if(nick[person].room==null)
+            return;
+
         var curdate=new Date();
         var timesent = (curdate.getHours() + ":" + curdate.getMinutes() + ":" + curdate.getSeconds());
 
         if (msg.charAt(0)=='/'){
-            console.log(person,nick[person]);
+            console.log("person:",nick[person].name,nick[person].room);
             nick[person].name = msg.substring(1,msg.length);
             update();
         }
